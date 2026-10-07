@@ -3,13 +3,13 @@ import Navbar from './Navbar';
 
 function AppLayout() {
   return (
-    <>
+    <div className="app-layout">
       <Navbar />
 
-      <main>
+      <main className="main-content">
         <Outlet />
       </main>
-    </>
+    </div>
   );
 }
 

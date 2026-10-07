@@ -1,41 +1,108 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleNavigation = () => {
+    setIsOpen(false);
+  };
+
   const handleLogout = () => {
+    setIsOpen(false);
     logout();
     navigate('/login');
   };
 
   return (
-    <nav>
-      <NavLink to="/resources">
-        DevShelf
-      </NavLink>
+    <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
+      <div className="sidebar-header">
+        <NavLink
+          to="/resources"
+          className="brand"
+          onClick={handleNavigation}
+        >
+          <span className="brand-mark">D</span>
+          <span>DevShelf</span>
+        </NavLink>
 
-      <NavLink to="/resources">
-        Resources
-      </NavLink>
+        <button
+          type="button"
+          className="mobile-menu-button"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle navigation"
+        >
+          ☰
+        </button>
+      </div>
 
-      <NavLink to="/snippets">
-        Snippets
-      </NavLink>
+      <div className="sidebar-section">
+        <p className="sidebar-label">
+          Workspace
+        </p>
 
-      <NavLink to="/tasks">
-        Tasks
-      </NavLink>
+        <nav className="sidebar-nav">
+          <NavLink
+            to="/resources"
+            onClick={handleNavigation}
+            className={({ isActive }) =>
+              isActive ? 'sidebar-link active' : 'sidebar-link'
+            }
+          >
+            <span className="sidebar-icon">▣</span>
+            <span>Resources</span>
+          </NavLink>
 
-      <span>
-        {user?.userName}
-      </span>
+          <NavLink
+            to="/snippets"
+            onClick={handleNavigation}
+            className={({ isActive }) =>
+              isActive ? 'sidebar-link active' : 'sidebar-link'
+            }
+          >
+            <span className="sidebar-icon">&lt;/&gt;</span>
+            <span>Snippets</span>
+          </NavLink>
 
-      <button onClick={handleLogout}>
-        Logout
-      </button>
-    </nav>
+          <NavLink
+            to="/tasks"
+            onClick={handleNavigation}
+            className={({ isActive }) =>
+              isActive ? 'sidebar-link active' : 'sidebar-link'
+            }
+          >
+            <span className="sidebar-icon">✓</span>
+            <span>Tasks</span>
+          </NavLink>
+        </nav>
+      </div>
+
+      <div className="sidebar-bottom">
+        <div className="user-profile">
+          <div className="user-avatar">
+            {user?.userName?.charAt(0).toUpperCase()}
+          </div>
+
+          <div className="user-info">
+            <strong>{user?.userName}</strong>
+            <span>{user?.email}</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="logout-button"
+          onClick={handleLogout}
+        >
+          <span>↪</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
   );
 }
 

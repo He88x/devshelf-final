@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
 
+import Button from '../components/Button';
+import Input from '../components/Input';
+import Textarea from '../components/Textarea';
+import Select from '../components/Select';
+import Card from '../components/Card';
+import Badge from '../components/Badge';
+
 function ResourcesPage() {
   const [resources, setResources] = useState([]);
 
@@ -19,7 +26,6 @@ function ResourcesPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [error, setError] = useState('');
 
-  // Get all resources when the page loads
   useEffect(() => {
     fetchResources();
   }, []);
@@ -41,7 +47,6 @@ function ResourcesPage() {
     }
   };
 
-  // Put a resource into edit mode
   const handleEdit = (resource) => {
     setEditingResource(resource);
 
@@ -49,9 +54,13 @@ function ResourcesPage() {
     setUrl(resource.url);
     setNotes(resource.notes);
     setType(resource.type);
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   };
 
-  // Create or update a resource
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -60,7 +69,6 @@ function ResourcesPage() {
       setCreating(true);
 
       if (editingResource) {
-        // UPDATE
         const response = await api.put(
           `/resources/${editingResource.id}`,
           {
@@ -81,7 +89,6 @@ function ResourcesPage() {
 
         setEditingResource(null);
       } else {
-        // CREATE
         const response = await api.post('/resources', {
           title,
           url,
@@ -95,7 +102,6 @@ function ResourcesPage() {
         ]);
       }
 
-      // Clear form
       setTitle('');
       setUrl('');
       setNotes('');
@@ -111,7 +117,6 @@ function ResourcesPage() {
     }
   };
 
-  // Cancel editing
   const handleCancelEdit = () => {
     setEditingResource(null);
 
@@ -123,7 +128,6 @@ function ResourcesPage() {
     setError('');
   };
 
-  // Delete a resource
   const handleDelete = async (id) => {
     const confirmed = window.confirm(
       'Are you sure you want to delete this resource?'
@@ -155,182 +159,278 @@ function ResourcesPage() {
     }
   };
 
+  const typeOptions = [
+    {
+      value: 'docs',
+      label: 'Documentation',
+    },
+    {
+      value: 'tutorial',
+      label: 'Tutorial',
+    },
+    {
+      value: 'article',
+      label: 'Article',
+    },
+    {
+      value: 'video',
+      label: 'Video',
+    },
+    {
+      value: 'tool',
+      label: 'Tool',
+    },
+    {
+      value: 'other',
+      label: 'Other',
+    },
+  ];
+
+  const getTypeLabel = (resourceType) => {
+    const option = typeOptions.find(
+      (item) => item.value === resourceType
+    );
+
+    return option
+      ? option.label
+      : resourceType;
+  };
+
   return (
-    <div>
-      <h1>Resources</h1>
+    <div className="page">
 
-      {error && <p>{error}</p>}
+      {/* Page Header */}
+      <header className="page-header">
+        <div>
+          <p className="page-eyebrow">
+            Developer Workspace
+          </p>
 
-      {/* Resource form */}
-      <section>
-        <h2>
-          {editingResource
-            ? 'Edit Resource'
-            : 'Add Resource'}
-        </h2>
+          <h1 className="page-title">
+            Resources
+          </h1>
 
-        <form onSubmit={handleSubmit}>
+          <p className="page-description">
+            Save documentation, tutorials, articles,
+            tools and other useful developer resources
+            you want to return to later.
+          </p>
+        </div>
+
+        <div className="page-header-stat">
+          <span>{resources.length}</span>
+          <small>
+            {resources.length === 1
+              ? 'Resource'
+              : 'Resources'}
+          </small>
+        </div>
+      </header>
+
+      {/* Error */}
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
+
+      {/* Add/Edit Resource */}
+      <Card className="form-card">
+        <div className="section-heading">
           <div>
-            <label htmlFor="title">
-              Title
-            </label>
+            <h2>
+              {editingResource
+                ? 'Edit Resource'
+                : 'Add a Resource'}
+            </h2>
 
-            <input
+            <p>
+              {editingResource
+                ? 'Update the information for this resource.'
+                : 'Keep useful developer resources organized in one place.'}
+            </p>
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="resource-form"
+        >
+          <div className="form-grid">
+            <Input
+              label="Title"
               id="title"
-              type="text"
               value={title}
               onChange={(event) =>
                 setTitle(event.target.value)
               }
+              placeholder="React documentation"
               required
             />
-          </div>
 
-          <div>
-            <label htmlFor="url">
-              URL
-            </label>
-
-            <input
+            <Input
+              label="URL"
               id="url"
               type="url"
               value={url}
               onChange={(event) =>
                 setUrl(event.target.value)
               }
+              placeholder="https://example.com"
               required
             />
-          </div>
 
-          <div>
-            <label htmlFor="type">
-              Type
-            </label>
-
-            <select
+            <Select
+              label="Type"
               id="type"
               value={type}
               onChange={(event) =>
                 setType(event.target.value)
               }
-            >
-              <option value="docs">
-                Documentation
-              </option>
-
-              <option value="tutorial">
-                Tutorial
-              </option>
-
-              <option value="article">
-                Article
-              </option>
-
-              <option value="video">
-                Video
-              </option>
-
-              <option value="tool">
-                Tool
-              </option>
-
-              <option value="other">
-                Other
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="notes">
-              Notes
-            </label>
-
-            <textarea
-              id="notes"
-              value={notes}
-              onChange={(event) =>
-                setNotes(event.target.value)
-              }
-              rows="4"
+              options={typeOptions}
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={creating}
-          >
-            {creating
-              ? 'Saving...'
-              : editingResource
-                ? 'Save Changes'
-                : 'Add Resource'}
-          </button>
+          <Textarea
+            label="Notes"
+            id="notes"
+            value={notes}
+            onChange={(event) =>
+              setNotes(event.target.value)
+            }
+            placeholder="Add a short note about why this resource is useful..."
+            rows={4}
+          />
 
-          {editingResource && (
-            <button
-              type="button"
-              onClick={handleCancelEdit}
+          <div className="form-actions">
+            <Button
+              type="submit"
+              disabled={creating}
             >
-              Cancel
-            </button>
-          )}
-        </form>
-      </section>
+              {creating
+                ? 'Saving...'
+                : editingResource
+                  ? 'Save Changes'
+                  : 'Add Resource'}
+            </Button>
 
-      {/* Resource list */}
-      <section>
-        <h2>Your Resources</h2>
+            {editingResource && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
+      </Card>
+
+      {/* Resources */}
+      <section className="resources-section">
+
+        <div className="section-heading">
+          <div>
+            <h2>Your Resources</h2>
+
+            <p>
+              Everything you've saved for your
+              development workflow.
+            </p>
+          </div>
+        </div>
 
         {loading ? (
-          <p>Loading resources...</p>
+          <div className="loading-state">
+            <p>Loading resources...</p>
+          </div>
         ) : resources.length === 0 ? (
-          <p>No resources found.</p>
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              +
+            </div>
+
+            <h3>
+              No resources yet
+            </h3>
+
+            <p>
+              Add your first documentation page,
+              tutorial, article or developer tool.
+            </p>
+          </div>
         ) : (
-          <div>
+          <div className="resource-grid">
             {resources.map((resource) => (
-              <article key={resource.id}>
-                <h3>{resource.title}</h3>
+              <Card
+                key={resource.id}
+                className="resource-card"
+              >
+                <div className="resource-card-top">
 
-                <p>{resource.notes}</p>
+                  <Badge>
+                    {getTypeLabel(resource.type)}
+                  </Badge>
 
-                <p>
-                  Type: {resource.type}
-                </p>
+                  <span className="resource-actions">
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() =>
+                        handleEdit(resource)
+                      }
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      className="text-button text-button-danger"
+                      onClick={() =>
+                        handleDelete(resource.id)
+                      }
+                      disabled={
+                        deletingId === resource.id
+                      }
+                    >
+                      {deletingId === resource.id
+                        ? 'Deleting...'
+                        : 'Delete'}
+                    </button>
+                  </span>
+
+                </div>
+
+                <h3 className="resource-title">
+                  {resource.title}
+                </h3>
+
+                {resource.notes && (
+                  <p className="resource-notes">
+                    {resource.notes}
+                  </p>
+                )}
 
                 <a
                   href={resource.url}
                   target="_blank"
                   rel="noreferrer"
+                  className="resource-url"
                 >
-                  Visit resource
+                  <span>
+                    Visit resource
+                  </span>
+
+                  <span>
+                    ↗
+                  </span>
                 </a>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleEdit(resource)
-                  }
-                >
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleDelete(resource.id)
-                  }
-                  disabled={
-                    deletingId === resource.id
-                  }
-                >
-                  {deletingId === resource.id
-                    ? 'Deleting...'
-                    : 'Delete'}
-                </button>
-              </article>
+              </Card>
             ))}
           </div>
         )}
+
       </section>
     </div>
   );

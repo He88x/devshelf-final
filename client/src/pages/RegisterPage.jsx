@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+
+import Button from '../components/Button';
+import Input from '../components/Input';
 
 function RegisterPage() {
   const [userName, setUserName] = useState('');
@@ -20,7 +23,12 @@ function RegisterPage() {
     setLoading(true);
 
     try {
-      await register(userName, email, password);
+      await register(
+        userName,
+        email,
+        password
+      );
+
       navigate('/login');
     } catch (err) {
       setError(
@@ -33,49 +41,105 @@ function RegisterPage() {
   };
 
   return (
-    <div>
-      <h1>Create your DevShelf account</h1>
+    <div className="auth-page">
 
-      {error && <p>{error}</p>}
+      <div className="auth-brand">
+        <div className="brand-mark">
+          D
+        </div>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="userName">Username</label>
-          <input
-            id="userName"
+        <span>DevShelf</span>
+      </div>
+
+      <div className="auth-card">
+
+        <div className="auth-header">
+          <p className="page-eyebrow">
+            Get Started
+          </p>
+
+          <h1>
+            Create your account
+          </h1>
+
+          <p>
+            Start building your personal developer
+            command center.
+          </p>
+        </div>
+
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
+        )}
+
+        <form
+          onSubmit={handleSubmit}
+          className="auth-form"
+        >
+          <Input
+            label="Username"
+            id="register-username"
             type="text"
             value={userName}
-            onChange={(event) => setUserName(event.target.value)}
+            onChange={(event) =>
+              setUserName(event.target.value)
+            }
+            placeholder="Your username"
             required
           />
-        </div>
 
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
+          <Input
+            label="Email"
+            id="register-email"
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) =>
+              setEmail(event.target.value)
+            }
+            placeholder="you@example.com"
             required
           />
-        </div>
 
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
+          <Input
+            label="Password"
+            id="register-password"
             type="password"
             value={password}
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
+            placeholder="Create a password"
             required
           />
+
+          <Button
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? 'Creating account...'
+              : 'Create account'}
+          </Button>
+        </form>
+
+        <div className="auth-footer">
+          <span>
+            Already have an account?
+          </span>
+
+          <Link to="/login">
+            Sign in
+          </Link>
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? 'Creating account...' : 'Create account'}
-        </button>
-      </form>
+      </div>
+
+      <p className="auth-note">
+        Organize your development workflow in one place.
+      </p>
+
     </div>
   );
 }

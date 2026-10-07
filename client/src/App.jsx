@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ResourcesPage from './pages/ResourcesPage';
+import TasksPage from './pages/TasksPage';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
@@ -37,7 +38,7 @@ function App() {
 
           <Route
             path="/tasks"
-            element={<h1>Tasks</h1>}
+            element={<TasksPage />}
           />
         </Route>
       </Route>
