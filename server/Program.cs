@@ -53,6 +53,7 @@ builder.Services.AddCors(options =>
                   "http://localhost:5174",
                   "http://localhost:5175",
                   "http://localhost:3000"
+                  "https://devshelf-final-3ofrzj6ds-aiko-cde4.vercel.app"
               )
               .AllowAnyMethod()
               .AllowAnyHeader();
