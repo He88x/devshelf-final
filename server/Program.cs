@@ -1,3 +1,4 @@
+```csharp
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -5,32 +6,33 @@ using server.Data;
 using server.Services;
 using Scalar.AspNetCore;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
+// Add EF Core and SQLite
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=devshelf.db";
 
-
-//Add Ef core plus SQLite
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=devshelf.db";
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 
-//Read JWT configuration 
+// Read JWT configuration
 var jwtKey = builder.Configuration["Jwt:Key"];
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
 
 if (string.IsNullOrEmpty(jwtKey))
+{
     throw new Exception("JWT Key is not configured");
+}
 
 var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer(options => {
+    .AddJwtBearer(options =>
+    {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
@@ -43,33 +45,40 @@ builder.Services.AddAuthentication("Bearer")
             ClockSkew = TimeSpan.Zero
         };
     });
+
 // Add CORS to allow frontend requests
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy.WithOrigins(
-                  "http://localhost:5173",
-                  "http://localhost:5174",
-                  "http://localhost:5175",
-                  "http://localhost:3000",
-                  "https://devshelf-final-3ofrzj6ds-aiko-cde4.vercel.app",
-                  "https://devshelf-final.vercel.app"
-              )
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175",
+                "http://localhost:3000",
+                "https://devshelf-final-3ofrzj6ds-aiko-cde4.vercel.app",
+                "https://devshelf-final.vercel.app"
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Add services to the container
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Apply pending database migrations at startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -87,4 +96,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
